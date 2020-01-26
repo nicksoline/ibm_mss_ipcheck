@@ -9,9 +9,23 @@ Write-Host "`r`n"$Worksheet.Name"`r`n"
 #get data from source
 $rowmax = ($Worksheet.UsedRange.Rows).count
 $rowA,$colA = 1,1
-for ($i=1; $i -le $rowmax-1; $i++)
+$R = Invoke-WebRequest https://www.ipvoid.com/ip-blacklist-check/
+$Form = $R.Forms[0]
+$Form.fields
+$Form.fields["ipAddr"] = 255.255.255.255
+$Form.fields
+function global:ipcheck {
+    param ($ip)
+    $Form.fields["ipAddr"] = $ip
+    $Form.fields
+    $Uri = "https://www.ipvoid.com/ip-blacklist-check/" + $Form.Action
+    $R = Invoke-WebRequest -Uri $Uri -Method POST -Body $Form.fields
+    $R.StatusDescription
+    return
+}
+for ($i=0; $i -le $rowmax-1; $i++)
 {
     $ip = $Worksheet.Cells.Item($rowA+$i, $colA).text
-    $ip
+    global:ipcheck($ip)
 }
 $Excel.quit()
